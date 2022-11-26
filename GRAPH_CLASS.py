@@ -28,6 +28,9 @@ class Graph:
         def __mul__(self, y):
             self.value *= y
             
+        def __neg__(self):
+            self.value *= -1
+            
             
     class Edge:
         def __init__(self, 
@@ -578,8 +581,6 @@ class Graph:
             self.__conexions[self.__uids[napp.dest]].add(napp.source)
             
     
-    
-
     def __str__(self) -> str:
         s = ""
         for i in self.__nodes:
@@ -602,6 +603,7 @@ class Graph:
             for n in self.__nodes:
                 if m != n:
                     self.Conect(m, n, weigth)
+                    
                 
     def AdjacentNodes(self, nod:Node) -> list:
         """
@@ -614,6 +616,7 @@ class Graph:
             adj.append(self.GetNodeUID(nuid))
             
         return adj
+    
     
     def IncidentNodes(self, nod:Node) -> list:
         """
@@ -629,8 +632,17 @@ class Graph:
         return inc
     
     
-    def Conex(self) -> bool:
+    def Conex(self, nod:Node = None) -> bool:
+        """
+        Retrun if the graph is conex or not.
+        Namely, you can reach to any node independently
+        of where you have started
         
+        If nod is not None, then the function looks if 
+        the graph is conex starting from that point.
+        In other case, it check if the graph is strongly
+        conex
+        """
         def __Visit(nod, vis, con):
             con.update(self.__conexions[nod])
             for nuid in self.__conexions[nod]:
@@ -639,11 +651,58 @@ class Graph:
                         vis.add(nuid)
                         newnode = self.GetNodeUID(nuid)
                         __Visit(newnode, vis, con)
+                      
                         
-        visited = set()
-        conected = set()
-        __Visit(self.__nodes[0], visited, conected)
-        if len(conected) == self.Size():
-            return True
+        if nod != None:
+            visited = set()
+            conected = set()
+            __Visit(nod, visited, conected)
+            
+            return len(conected) == self.Size()
         
-        return False
+        else:
+            conex = True
+            for n in self.__nodes:
+                visited = set()
+                conected = set()
+                __Visit(n, visited, conected)
+                conex = conex and len(conected) == self.Size()
+                
+            return conex
+        
+        
+    def Conected(self, fr_node, to_node) -> bool:
+        """
+        Check if two nodes are or not conected.
+        Namely, you can reach to the second node from the 
+        first one (but not necessary in the other way)
+
+        Parameters
+        ----------
+        fr_node : TYPE
+            The starting node.
+        to_node : TYPE
+            The node that we want to know if is conected.
+
+        Returns
+        -------
+        bool
+            If the nodes are or not connected.
+
+        """
+        def __Search(fr_nod, to_node, vis):
+            if to_node.uid not in self.__conexions[fr_nod]:
+                find = False
+                for nuid in self.__conexions[fr_nod]:
+                    if nuid not in vis:
+                        vis.add(nuid)
+                        newnode = self.GetNodeUID(nuid)
+                        find = __Search(newnode, to_node, vis)
+                        
+                return find
+                        
+            else:
+                return True
+        
+        visited = set()
+        return __Search(fr_node, to_node, visited)
