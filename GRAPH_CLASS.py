@@ -86,6 +86,7 @@ class Graph:
             
         for i in self.__nodes:
             if nod.uid in self.__conexions[i]:
+                self.__conexions[i].remove(nod.uid)
                 j = 0
                 while j < len(self.__edges[i]):
                     if self.__edges[i][j].dest == nod.uid:
@@ -142,6 +143,7 @@ class Graph:
                     
                     i += 1
                     
+                    
         else:
             if to_node.uid in self.__conexions[fr_node]:
                 
@@ -158,12 +160,29 @@ class Graph:
                     
     def Isolated(self):
         isol = []
-        for node in self.__conexions.keys():
+        for node in self.__nodes:
             if len(self.__conexions[node]) == 0:
                 isol.append(node)
                 
         return isol
     
+    
+    def Separate(self, nod:Node):
+        
+        self.__edges[nod] = []
+        self.__conexions[nod] = set()
+        
+        for i in self.__nodes:
+            if nod.uid in self.__conexions[i]:
+                self.__conexions[i].remove(nod.uid)
+                j = 0
+                while j < len(self.__edges[i]):
+                    if self.__edges[i][j].dest == nod.uid:
+                        self.__edges[i].pop(j)
+                        j -= 1
+                    
+                    j += 1
+                    
 
     def Loops(self):
         loop = []
@@ -370,6 +389,8 @@ class Graph:
             self.__edges[self.__uids[napp.dest]].append(new_con)
             self.__conexions[self.__uids[napp.dest]].add(napp.source)
             
+    
+    
 
     def __str__(self) -> str:
         s = ""
@@ -380,4 +401,3 @@ class Graph:
                 s += "\n"
             
         return s
-        
