@@ -627,3 +627,23 @@ class Graph:
                 inc.append(n)
                 
         return inc
+    
+    
+    def Conex(self) -> bool:
+        
+        def __Visit(nod, vis, con):
+            con.update(self.__conexions[nod])
+            for nuid in self.__conexions[nod]:
+                if len(con) < self.Size():
+                    if nuid not in vis:
+                        vis.add(nuid)
+                        newnode = self.GetNodeUID(nuid)
+                        __Visit(newnode, vis, con)
+                        
+        visited = set()
+        conected = set()
+        __Visit(self.__nodes[0], visited, conected)
+        if len(conected) == self.Size():
+            return True
+        
+        return False
