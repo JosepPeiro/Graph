@@ -11,6 +11,6 @@ I used their notes for improve my ideas and add others.
 
 Enjoy the algorithm
 
-    Date of beggining 20/07/2022
-    Date of finishing 13/10/2022
+    Date of beggining 25/11/2022
+    Date of finishing ??/??/????
     Author Josep Peiró Ramos
