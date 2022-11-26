@@ -59,6 +59,9 @@ class Graph:
         """Return the list of edges"""
         return self.__edges
     
+    def GetNodeUID(self, nuid) -> Node:
+        """Return the node that correspond to that uid"""
+        return self.__uids[nuid]
     
     def Size(self):
         """Return the quantity of nodes in the graph"""
@@ -556,7 +559,6 @@ class Graph:
         Convert all directed nodes in the graph to 
         undirected with the same weigth
         """
-        
         next_append = []
         for n in self.__nodes:
             for e in self.__edges[n]:
@@ -598,4 +600,30 @@ class Graph:
         """
         for m in self.__nodes:
             for n in self.__nodes:
-                self.Conect(m, n, weigth)
+                if m != n:
+                    self.Conect(m, n, weigth)
+                
+    def AdjacentNodes(self, nod:Node) -> list:
+        """
+        Return a list with the adjacent nodes from a node.
+        Namely, every node where wou can arrive from 
+        the main node.
+        """
+        adj = []
+        for nuid in self.__conexions[nod]:
+            adj.append(self.GetNodeUID(nuid))
+            
+        return adj
+    
+    def IncidentNodes(self, nod:Node) -> list:
+        """
+        Return a list with the incident nodes from a node.
+        Namely, every node which have a bow that 
+        connect with te main node.
+        """
+        inc = []
+        for n in self.__nodes:
+            if nod.uid in self.__conexions[n]:
+                inc.append(n)
+                
+        return inc
