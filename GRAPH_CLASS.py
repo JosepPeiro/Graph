@@ -48,21 +48,38 @@ class Graph:
         self.__edges = {} # Node:[Edge]
         
         self.__conexions = {} #Node:set(uid)
-        self.__uids = {}
+        self.__uids = {} #uid:Node
         
         
     def GetNodes(self):
+        """Return the list of nodes"""
         return self.__nodes
     
     def GetEdges(self):
+        """Return the list of edges"""
         return self.__edges
     
     
     def Size(self):
+        """Return the quantity of nodes in the graph"""
         return len(self.__nodes)
     
     
     def NewNode(self, uid, value, prior = None):
+        """
+        Make a new node and automatically appends it
+        to the graph
+
+        Parameters
+        ----------
+        uid : TYPE
+            The id of the new node.
+        value : TYPE
+            The value of the new node.
+        prior : TYPE, optional
+            The priority of the new node. 
+            The default is None.
+        """
         new = Graph.Node(uid, value, prior)
         self.__nodes.append(new)
         self.__edges[new] = []
@@ -71,6 +88,14 @@ class Graph:
         
         
     def Append(self, nod:Node):
+        """
+        Appends a node to the graph
+
+        Parameters
+        ----------
+        nod : Node
+            A node already created.
+        """
         self.__nodes.append(nod)
         self.__edges[nod] = []
         self.__conexions[nod] = set()
@@ -78,6 +103,16 @@ class Graph:
         
     
     def Remove(self, nod:Node):
+        """
+        Remove the node from the graph and 
+        automatically destroy every conection with
+        this graph
+
+        Parameters
+        ----------
+        nod : Node
+            The node we want to destroy.
+        """
         if nod in self.__nodes:
             self.__nodes.remove(nod)
             del self.__edges[nod]
@@ -98,7 +133,26 @@ class Graph:
         
     def ReplaceWeigth(self, fr_node:Node, to_node:Node, 
                       new_weigth = 0, old_weigth = None):
-        
+        """
+        Create a bow between two nodes, and if it 
+        already exist, change its weigth
+
+        Parameters
+        ----------
+        fr_node : Node
+            The node where the bow start.
+        to_node : Node
+            The node where the bow is addresed.
+        new_weigth : TYPE, optional
+            The new weigth, that will replace the 
+            weigth of the bow.
+            The default is 0.
+        old_weigth : TYPE, optional
+            If it's used, search the bow that connect 
+            the two nodes and has this weigth, 
+            in order to change this weigth. 
+            The default is None.
+        """
         if old_weigth == None:
             if to_node.uid in self.__conexions[fr_node]:
                 changed = False
@@ -116,10 +170,28 @@ class Graph:
         else:
             for n in self.__edges[fr_node]:
                 if n.dest == to_node.uid and n.weigth == old_weigth:
-                    self.__edges[fr_node][i].weigth = new_weigth
+                    n.weigth = new_weigth
             
             
     def Conect(self, fr_node:Node, to_node:Node, weigth = 0, directed = True):
+        """
+        Conect a bow between two nodes
+
+        Parameters
+        ----------
+        fr_node : Node
+            The node where the bow starts.
+        to_node : Node
+            The node where the bow ends.
+        weigth : TYPE, optional
+            The weigth of the bow. 
+            The default is 0.
+        directed : bool, optional
+            If the bow is directed or not.
+            If it's not directed, it creates two bows
+            with the same weigth in both directions
+            The default is True.
+        """
         new_con = Graph.Edge(fr_node.uid, to_node.uid, weigth)
         self.__edges[fr_node].append(new_con)
         self.__conexions[fr_node].add(to_node.uid)
@@ -131,14 +203,29 @@ class Graph:
             
             
     def Disconnect(self, fr_node:Node, to_node:Node, weigth = None):
+        """
+        Destroys all bows between 2 nodes
+
+        Parameters
+        ----------
+        fr_node : Node
+            The node where the bow starts.
+        to_node : Node
+            The node where the bow ends.
+        weigth : TYPE, optional
+            The weight of the bow. If we want to specify 
+            a bow by it's weigth
+            The default is None.
+        """
         if weigth == None:
             if to_node.uid in self.__conexions[fr_node]:
+                self.__conexions[fr_node].remove(to_node.uid)
                 
                 i = 0
                 while i < len(self.__edges[fr_node]):
                     if self.__edges[fr_node][i].dest == to_node.uid:
                         self.__edges[fr_node].pop(i)
-                        self.__conexions[fr_node].remove(to_node.uid)
+                        
                         i -= 1
                     
                     i += 1
@@ -159,16 +246,33 @@ class Graph:
                     
                     
     def Isolated(self):
+        """
+        Return the nodes that have no conexion with
+        the rest of the nodes
+        """
+        
         isol = []
         for node in self.__nodes:
             if len(self.__conexions[node]) == 0:
-                isol.append(node)
+                likely = True
+                n = 0
+                while n < len(self.__nodes) and likely:
+                    nnode = self.__nodes[n]
+                    if node.uid in self.__conexions[nnode]:
+                        likely = False
+                    n += 1
+                        
+                if likely:
+                    isol.append(node)
                 
         return isol
     
     
     def Separate(self, nod:Node):
-        
+        """
+        Destroys all kinds of conexions with
+        one node
+        """
         self.__edges[nod] = []
         self.__conexions[nod] = set()
         
@@ -184,7 +288,11 @@ class Graph:
                     j += 1
                     
 
-    def Loops(self):
+    def Loops(self) -> list:
+        """
+        Return all nodes that have at least one loop,
+        namely, that has a bow that reference himself
+        """
         loop = []
         for node in self.__conexions.keys():
             if node.uid in self.__conexions[node]:
@@ -193,7 +301,11 @@ class Graph:
         return loop
     
     
-    def ValueLoops(self):
+    def ValueLoops(self) -> list:
+        """
+        Return the loops (the edges that starts at the 
+        same point as ends
+        """
         loop = []
         for node in self.__edges.keys():
             if node.uid in self.__conexions[node]:
@@ -205,6 +317,27 @@ class Graph:
     
     
     def Adjacent(self, a:Node, b:Node, directed = True) -> bool:
+        """
+        Return if two nodes are adjacents or not.
+        If there is a bow that conect both
+
+        Parameters
+        ----------
+        fr_node : Node
+            The node where the bow starts.
+        to_node : Node
+            The node where the bow ends.
+        directed : bool, optional
+            If we consider one or both directions 
+            in order to say that two nodes are adjacents. 
+            The default is True.
+
+        Returns
+        -------
+        bool
+            If the nodes are or not adjacents.
+
+        """
         if b.uid in self.__conexions[a]:return True
         if not directed:
             if a.uid in self.__conexions[b]:return True            
@@ -213,6 +346,12 @@ class Graph:
     
     
     def Incident(self, a:Node, b:Node, directed = True) -> bool:
+        """
+        The same function as Adjacent but in the other 
+        direction
+        If directed is True, i has exactly the same 
+        function
+        """
         if a.uid in self.__conexions[b]:return True
         if not directed:
             if b.uid in self.__conexions[a]:return True            
@@ -221,6 +360,22 @@ class Graph:
     
     
     def PrintAdjacencyMatrix(self, values = False):
+        """
+        Prints the Adjacency Matrix of the graph
+        without calculating it
+
+        Parameters
+        ----------
+        values : bool, optional
+            If values is False it prints the number of 
+            adjacencies between each graph. And set a 
+            '.' if there isn't any adjcence.
+            If values is True it prints the values of
+            each bow, or the sum of them if there
+            are more than one bow. If there isn't any bow
+            it set a 0
+            The default is False.
+        """
         
         def __Values(self):
             s = "    "
@@ -274,8 +429,29 @@ class Graph:
         else: print(__NotValues(self))
         
         
-    def AdjacencyMatrix(self, values = False):
-        
+    def AdjacencyMatrix(self, values = False) -> list: #matrix
+        """
+        It calculates and return the Adjacency Matrix 
+        of the graph
+
+        Parameters
+        ----------
+        values : bool, optional
+            If values is False it count the number of 
+            adjacencies between each graph. And set a 
+            '.' if there isn't any adjcence.
+            If values is True it count the values of
+            each bow, or the sum of them if there
+            are more than one bow. If there isn't any bow
+            it set a 0
+            The default is False.
+            
+        Returns
+        -------
+        m : list (matrix)
+            The adjacence matrix.
+
+        """
         def __Values(self):
             m = []
             for i in self.__nodes:
@@ -319,7 +495,8 @@ class Graph:
         else: return __NotValues(self)
     
     
-    def IncidenceMatrix(self):
+    def IncidenceMatrix(self) -> list: #matrix
+        """Return the Incidence Matrix of the Graph"""
         
         rows = {n.uid:[] for n in self.__nodes}
         i = 0
@@ -347,6 +524,7 @@ class Graph:
     
     
     def PrintIncidenceMatrix(self):
+        """Print the Incidence Matrix of the Graph"""
         
         m = self.IncidenceMatrix()
         
@@ -370,6 +548,10 @@ class Graph:
         
     
     def Undirected(self):
+        """
+        Convert all directed nodes in the graph to 
+        undirected with the same weigth
+        """
         
         next_append = []
         for n in self.__nodes:
