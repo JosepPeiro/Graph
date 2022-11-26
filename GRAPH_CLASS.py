@@ -380,11 +380,13 @@ class Graph:
         def __Values(self):
             s = "    "
             for index in self.__nodes:
-                s += str(index.uid) + "   "
+                idxui = str(index.uid)
+                s += idxui + " " + " " * (3 - len(idxui))
                 
             s += "\n"
             for i in self.__nodes:
-                s += str(i.uid) + "   "
+                iuid = str(i.uid)
+                s += iuid + " " + " " * (3 - len(iuid))
                 for j in self.__nodes:
                     if j.uid in self.__conexions[i]:
                         #s += "#   "
@@ -393,7 +395,7 @@ class Graph:
                             if k.dest == j.uid:
                                 dist += k.weigth
                         distance = str(dist)
-                        s += distance + " " * (4-len(distance))
+                        s += distance + " " + " " * (3 - len(distance))
                     else:
                         s += "0   "
                         
@@ -404,11 +406,13 @@ class Graph:
         def __NotValues(self):
             s = "    "
             for index in self.__nodes:
-                s += str(index.uid) + "   "
+                idxui = str(index.uid)
+                s += idxui + " " + " " * (3 - len(idxui))
                 
             s += "\n"
             for i in self.__nodes:
-                s += str(i.uid) + "   "
+                iuid = str(i.uid)
+                s += iuid + " " + " " * (3 - len(iuid))
                 for j in self.__nodes:
                     if j.uid in self.__conexions[i]:
                         #s += "#   "
@@ -417,7 +421,7 @@ class Graph:
                             if k.dest == j.uid:
                                 dist += 1
                         distance = str(dist)
-                        s += distance + " " * (4-len(distance))
+                        s += distance + " " + " " * (3 - len(distance))
                     else:
                         s += ".   "
                         
@@ -576,10 +580,22 @@ class Graph:
 
     def __str__(self) -> str:
         s = ""
-        for i in self.__edges.keys():
+        for i in self.__nodes:
             s += str(i.uid) + "\n"
             for j in self.__edges[i]:
                 s += "\t" + str(j.source) + " -- " + str(j.weigth) + " -> " + str(j.dest)
                 s += "\n"
             
         return s
+    
+    
+    def Complete(self, weigth = 0):
+        """
+        Add an indirected bow between each node of 
+        the graph in order to make the graph complete.
+        You can decide the weigth of all the edges with
+        weigth
+        """
+        for m in self.__nodes:
+            for n in self.__nodes:
+                self.Conect(m, n, weigth)
