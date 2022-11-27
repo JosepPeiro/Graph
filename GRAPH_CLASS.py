@@ -706,3 +706,87 @@ class Graph:
         
         visited = set()
         return __Search(fr_node, to_node, visited)
+    
+    
+    def Export(self, file:str = None):
+        if file is None:
+            file = ""
+            for nod in range(4):
+                file += self.__nodes[nod].uid
+            file += "graph.txt"
+        
+        with open(file,'w',encoding = 'UTF-8') as g:
+            for i in self.__nodes:
+                g.write(str(i.uid) + " " + str(i.value))
+                if i.priority != None:
+                    g.write(" " + str(i.priority))
+                g.write("\n")
+                for j in self.__edges[i]:
+                    g.write("\t" + str(j.source) + " -- " + str(j.weigth))
+                    g.write(" -> " + str(j.dest) + "\n")
+                    
+    # Corregir esto!!!!!!!!!!!!!!!!!!!!!!!
+    # Cuando cambia un uid, tambien tiene que cambiar self.__conexions y self.__edges
+    # Comprobar el resto de funciones porque pasaran cosas parecidas
+    """
+    def __ChangeKey(self, d:dict, k, nk):
+        d[nk] = k
+        del d[k]
+        
+        
+    def __IntUID(self):
+        for nod in self.__nodes:
+            nod.uid = int(nod.uid)
+            self.__ChangeKey(self.__uids, nod.uid, int(nod.uid))
+            #self.__ChangeKey(self.__uids, nod, int(nod.uid))
+            
+            
+    def __IntValue(self):
+        for nod in self.__nodes:
+            nod.value = int(nod.value)
+            
+            
+    def __IntPrior(self):
+        for nod in self.__nodes:
+            nod.priority = int(nod.priority)
+            
+            
+    def __IntWeigth(self):
+        for nod in self.__nodes:
+            for ed in self.__edges[nod]:
+                ed.weigth = int(ed.weigth) 
+    """
+    def Import(self, file:str, 
+               int_uid:bool = True,
+               int_value:bool = True,
+               int_priority:bool = True,
+               int_weigth:bool = True):
+
+        f = open(file, "r", encoding = "UTF-8")
+        l = f.readline()
+        l_edges = []
+        while l != "":
+            #print(l)
+            if l[0] != "\t":
+                print(l)
+                print(l[0], l)
+                nod = l.strip().split()
+                if len(nod) == 3:
+                    self.NewNode(nod[0], nod[1], nod[2])
+                    
+                else:
+                    self.NewNode(nod[0], nod[1])
+                    
+            else:
+                l_edges.append(l.strip().split())
+                
+            l = f.readline()
+            
+        f.close()
+        
+        for ed in l_edges:
+            self.Conect(
+                self.GetNodeUID(ed[0]),
+                self.GetNodeUID(ed[4]),
+                ed[2])
+        return
