@@ -709,10 +709,24 @@ class Graph:
     
     
     def Export(self, file:str = None):
+        """
+        This function creates (or modificate) a file
+        creating an interpretative graph. 
+        This can be used to move a graph from one place 
+        to another and keep all information
+
+        Parameters
+        ----------
+        file : str, optional
+            The name of the file. We can expecify it or
+            the function will create an automatic name
+            with the uids of the firts nodes.
+            The default is None.
+        """
         if file is None:
             file = ""
             for nod in range(4):
-                file += self.__nodes[nod].uid
+                file += str(self.__nodes[nod].uid)
             file += "graph.txt"
         
         with open(file,'w',encoding = 'UTF-8') as g:
