@@ -739,37 +739,53 @@ class Graph:
                     g.write("\t" + str(j.source) + " -- " + str(j.weigth))
                     g.write(" -> " + str(j.dest) + "\n")
                     
-    # Corregir esto!!!!!!!!!!!!!!!!!!!!!!!
-    # Cuando cambia un uid, tambien tiene que cambiar self.__conexions y self.__edges
-    # Comprobar el resto de funciones porque pasaran cosas parecidas
-    """
+                    
     def __ChangeKey(self, d:dict, k, nk):
-        d[nk] = k
+        d[nk] = d[k]
         del d[k]
         
         
     def __IntUID(self):
         for nod in self.__nodes:
+
+            aux_n = self.Node(nod.uid, nod.value, nod.priority)
             nod.uid = int(nod.uid)
-            self.__ChangeKey(self.__uids, nod.uid, int(nod.uid))
-            #self.__ChangeKey(self.__uids, nod, int(nod.uid))
+            self.__uids[aux_n.uid].uid = int(nod.uid)
+
+            for con in self.__conexions[nod]:
+                self.__conexions[nod].add(int(con))
+                self.__conexions[nod].discard(str(con))
+                
+            for ed in self.__edges[nod]:
+                ed.source = int(ed.source)
+                ed.dest = int(ed.dest)
+                
+            self.__ChangeKey(self.__uids, aux_n.uid, int(nod.uid))
             
             
     def __IntValue(self):
         for nod in self.__nodes:
+            aux_n = self.Node(nod.uid, nod.value, nod.priority)
             nod.value = int(nod.value)
             
+            self.__uids[aux_n.uid].value = int(nod.value)
+
             
     def __IntPrior(self):
         for nod in self.__nodes:
-            nod.priority = int(nod.priority)
+            if nod.priority != None:
+                aux_n = self.Node(nod.uid, nod.value, nod.priority)
+                nod.priority = int(nod.priority)
+                
+                self.__uids[aux_n.uid].priority = int(nod.priority)
             
             
     def __IntWeigth(self):
         for nod in self.__nodes:
             for ed in self.__edges[nod]:
-                ed.weigth = int(ed.weigth) 
-    """
+                ed.weigth = int(ed.weigth)
+                
+                
     def Import(self, file:str, 
                int_uid:bool = True,
                int_value:bool = True,
@@ -804,3 +820,9 @@ class Graph:
                 self.GetNodeUID(ed[4]),
                 ed[2])
         return
+    
+    def DefaultInteger(self):
+        self.__IntUID()
+        self.__IntValue()
+        self.__IntPrior()
+        self.__IntWeigth()
