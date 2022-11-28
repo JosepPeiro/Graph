@@ -634,7 +634,7 @@ class Graph:
     
     def Conex(self, nod:Node = None) -> bool:
         """
-        Retrun if the graph is conex or not.
+        Return if the graph is conex or not.
         Namely, you can reach to any node independently
         of where you have started
         
@@ -763,12 +763,12 @@ class Graph:
             self.__ChangeKey(self.__uids, aux_n.uid, int(nod.uid))
             
             
-    def __IntValue(self):
+    def __FloatValue(self):
         for nod in self.__nodes:
             aux_n = self.Node(nod.uid, nod.value, nod.priority)
-            nod.value = int(nod.value)
+            nod.value = float(nod.value)
             
-            self.__uids[aux_n.uid].value = int(nod.value)
+            self.__uids[aux_n.uid].value = float(nod.value)
 
             
     def __IntPrior(self):
@@ -780,49 +780,123 @@ class Graph:
                 self.__uids[aux_n.uid].priority = int(nod.priority)
             
             
-    def __IntWeigth(self):
+    def __FloatWeigth(self):
         for nod in self.__nodes:
             for ed in self.__edges[nod]:
-                ed.weigth = int(ed.weigth)
+                ed.weigth = float(ed.weigth)
                 
                 
     def Import(self, file:str, 
-               int_uid:bool = True,
-               int_value:bool = True,
-               int_priority:bool = True,
-               int_weigth:bool = True):
+               int_uid:bool = False,
+               flt_value:bool = False,
+               int_priority:bool = False,
+               flt_weigth:bool = False,
+               num_default:bool = True):
+        """
+        Opposite function to export, that import a graph
+        from a file.
+        You can decide the type of the data that the graph
+        will storage. It will be integers for uid and 
+        priority and float for value and weigth for default.
+        But you can change it
 
-        f = open(file, "r", encoding = "UTF-8")
-        l = f.readline()
-        l_edges = []
-        while l != "":
-            #print(l)
-            if l[0] != "\t":
-                print(l)
-                print(l[0], l)
-                nod = l.strip().split()
-                if len(nod) == 3:
-                    self.NewNode(nod[0], nod[1], nod[2])
-                    
-                else:
-                    self.NewNode(nod[0], nod[1])
-                    
-            else:
-                l_edges.append(l.strip().split())
-                
-            l = f.readline()
-            
-        f.close()
+        Parameters
+        ----------
+        file : str
+            The name of the file.
+        int_uid : bool, optional
+            If the uid will be imported as integer or not. 
+            The default is False.
+        flt_value : bool, optional
+            If the value will be imported as float or not.
+            The default is False.
+        int_priority : bool, optional
+            If the priority will be imported as integer or not.
+            The default is False.
+        flt_weigth : bool, optional
+            If the priority will be imported as float or not. 
+            The default is False.
+        num_default : bool, optional
+            If we want that all data be imported as numbers
+            (int or float). 
+            The default is True.
+        """
         
-        for ed in l_edges:
-            self.Conect(
-                self.GetNodeUID(ed[0]),
-                self.GetNodeUID(ed[4]),
-                ed[2])
-        return
+        def __Importstr(self):
+
+            f = open(file, "r", encoding = "UTF-8")
+            l = f.readline()
+            l_edges = []
+            while l != "":
+                #print(l)
+                if l[0] != "\t":
+                    nod = l.strip().split()
+                    if len(nod) == 3:
+                        self.NewNode(nod[0], nod[1], nod[2])
+                    else:
+                        self.NewNode(nod[0], nod[1])
+                else:
+                    l_edges.append(l.strip().split())
+
+                l = f.readline()
+                
+            f.close()
+            
+            for ed in l_edges:
+                self.Conect(
+                    self.GetNodeUID(ed[0]),
+                    self.GetNodeUID(ed[4]),
+                    ed[2])
+                
+            return 
+        
+        
+        def __DefInteger(self):
+            f = open(file, "r", encoding = "UTF-8")
+            l = f.readline()
+            l_edges = []
+            while l != "":
+                #print(l)
+                if l[0] != "\t":
+                    nod = l.strip().split()
+                    if len(nod) == 3:
+                        self.NewNode(int(nod[0]), 
+                                     float(nod[1]), 
+                                     int(nod[2]))
+                    else:
+                        self.NewNode(int(nod[0]), 
+                                     float(nod[1]))
+                else:
+                    l_edges.append(l.strip().split())
+
+                l = f.readline()
+                
+            f.close()
+            
+            for ed in l_edges:
+                self.Conect(
+                    self.GetNodeUID(int(ed[0])),
+                    self.GetNodeUID(int(ed[4])),
+                    float(ed[2]))
+            
+            return
+        
+        if num_default:__DefInteger(self)
+        else:
+            self.__Importstr()
+            if int_uid:
+                self.__IntUID()
+            if flt_value:
+                self.__IntValue()
+            if int_priority:
+                self.__IntPrior()
+            if flt_weigth:
+                self.__IntWeigth()
+        
     
-    def DefaultInteger(self):
+    def DefaultNumbers(self):
+        """Convert all data into numbers"""
         self.__IntUID()
-        self.__IntValue()
+        self.__FloatValue()
         self.__IntPrior()
-        self.__IntWeigth()
+        self.__FloatWeigth()
